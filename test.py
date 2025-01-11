@@ -6,6 +6,9 @@ from utils import imshow
 import torchvision
 
 def main():
+    # setting up GPU as default device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Using device:", device)
     # Data tranformation
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -17,16 +20,24 @@ def main():
     testloader = torch.utils.data.DataLoader(testset, batch_size=64, shuffle=False)
 
     # Read model
-    model = SimpleCNN()
+    model = SimpleCNN().to(device)
     model.load_state_dict(torch.load("model.pth"))
     model.eval()
 
     # Displaying sample images with predictions
     dataiter = iter(testloader)
     images, labels = next(dataiter)
+    
+    images = images.to(device)
+    labels = labels.to(device)
+    
     outputs = model(images)
     _, predicted = torch.max(outputs, 1)
-
+    
+    #transfering back to CPU for visualization purposes
+    im_cpu = images.cpu()
+    imshow(torchvision.utils.make_grid(im_cpu))
+    
     for i in range(5):
         imshow(torchvision.utils.make_grid(images))
 

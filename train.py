@@ -6,6 +6,10 @@ from models.simple_cnn import SimpleCNN
 from utils import imshow
 
 def main():
+    # setting up GPU as default device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Using device:", device)
+    
     # Data transformation
     transform = transforms.Compose([
         transforms.RandomHorizontalFlip(),
@@ -26,14 +30,18 @@ def main():
 
     # model init
     print("------init model  ------")
-    model = SimpleCNN()
+    model = SimpleCNN().to(device) #transfering to GPU
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     print("------init model - done ------")
     # Train
-    for epoch in range(10):  # Liczba epok
+    for epoch in range(20):  # added to 20 - testing to see if model would overfit
         running_loss = 0.0
         for inputs, labels in trainloader:
+            #transfering to GPU
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
