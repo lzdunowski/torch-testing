@@ -1,7 +1,7 @@
 import matplotlib
-# matplotlib.use('TkAgg')
+matplotlib.use('TkAgg')
 # matplotlib.use('Agg')
-matplotlib.use('MacOSX')
+#matplotlib.use('MacOSX')
 import matplotlib.pyplot as plt
 import numpy as np
 
