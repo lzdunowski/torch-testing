@@ -1,6 +1,7 @@
 import torch
 import torchvision.transforms as transforms
 from torchvision.datasets import CIFAR10
+from torch.utils.data import DataLoader
 from models.simple_cnn import SimpleCNN
 from utils import imshow
 import torchvision
@@ -17,11 +18,11 @@ def main():
 
     # load testing data
     testset = CIFAR10(root='./data', train=False, download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=64, shuffle=False)
+    testloader = DataLoader(testset, batch_size=64, shuffle=False)
 
     # Read model
     model = SimpleCNN().to(device)
-    model.load_state_dict(torch.load("model.pth"))
+    model.load_state_dict(torch.load("best_model.pth", map_location=device))
     model.eval()
 
     # Displaying sample images with predictions
@@ -37,12 +38,8 @@ def main():
     #transfering back to CPU for visualization purposes
     im_cpu = images.cpu()
     imshow(torchvision.utils.make_grid(im_cpu))
-    
-    for i in range(5):
-        imshow(torchvision.utils.make_grid(images))
-
-    print("Rzeczywiste etykiety(test):", labels.numpy())
-    print("Przewidywane etykiety(test):", predicted.numpy())
+    print("Rzeczywiste etykiety(test):", labels.cpu().numpy())
+    print("Przewidywane etykiety(test):", predicted.cpu().numpy())
 
     # Model testing
     correct = 0
@@ -50,12 +47,17 @@ def main():
 
     with torch.no_grad():
         for inputs, labels in testloader:
+            inputs = inputs.to(device)
+            labels = labels.to(device)
             outputs = model(inputs)
             _, predicted = torch.max(outputs, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
+            
+    accuracy = 100.0 * correct / total
+    print(f"Dokładność na zbiorze testowym: {accuracy:.2f}%")
 
-    print(f"Dokładność: {100 * correct / total:.2f}%")
+    
 
 if __name__ == "__main__":
     main()
